@@ -5,6 +5,7 @@ psycopg2-binary
 alembic
 python-dotenv
 pydantic
+pydantic[email]
 pytest
 httpx
 asyncpg
