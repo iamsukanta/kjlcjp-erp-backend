@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from logging.config import fileConfig
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
@@ -10,14 +10,14 @@ from dotenv import load_dotenv
 load_dotenv(".env")
 
 from app.core.database import Base
-from app.models import company  # Import all models here
+from app.models.company import Company  # Import all models here
 
 # Alembic Config
 config = context.config
 fileConfig(config.config_file_name)
 
 # Async database URL
-DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URI")
+DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URI").replace("postgresql+psycopg2", "postgresql+asyncpg")
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 target_metadata = Base.metadata
