@@ -9,5 +9,7 @@ pydantic[email]
 pytest
 httpx
 asyncpg
-passlib[bcrypt]
+passlib>=1.7,<2.0
+bcrypt<4.0.0
 python-jose[cryptography]
+python-multipart

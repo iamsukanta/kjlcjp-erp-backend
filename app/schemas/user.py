@@ -9,7 +9,7 @@ class PermissionCreate(PermissionBase):
     pass
 
 class PermissionOut(PermissionBase):
-    id: str
+    id: int
 
     class Config:
         orm_mode = True
@@ -21,7 +21,7 @@ class RoleCreate(RoleBase):
     permission_ids: List[str]
 
 class RoleOut(RoleBase):
-    id: str
+    id: int
     permissions: List[PermissionOut]
 
     class Config:
@@ -37,7 +37,7 @@ class UserCreate(UserBase):
     role_ids: List[str]
 
 class UserOut(UserBase):
-    id: str
+    id: int
     roles: List[RoleOut]
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
