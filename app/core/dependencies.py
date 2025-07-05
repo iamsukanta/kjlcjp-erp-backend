@@ -6,24 +6,32 @@ from app.core.database import get_async_session
 from app.schemas.token import TokenData
 from app.crud.user import get_user_by_email
 from app.core.security import decode_access_token
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+bearer_scheme = HTTPBearer()
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_async_session)):
+# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme), db: AsyncSession = Depends(get_async_session)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        token = credentials.credentials
+        print(token, 'token ..')
         payload = decode_access_token(token)
-        email: str = payload.get("email")
-        if email is None:
+
+        print(payload, 'payload data ...')
+        if payload is None:
             raise credentials_exception
-        token_data = TokenData(id = payload.get("id"), email=email)
+        email: str = payload.get("email")
     except JWTError:
         raise credentials_exception
-    user = get_user_by_email(db, email=token_data.email)
+    
+    user = await get_user_by_email(db, email=email)
     if user is None:
         raise credentials_exception
+    
     return user

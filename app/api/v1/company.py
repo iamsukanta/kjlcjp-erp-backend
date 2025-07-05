@@ -3,11 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_async_session
 from app.schemas.company import CompanyCreate, CompanyUpdate, CompanyRead
 from app.crud import company as crud
+from app.core.permissions import has_permission
 
 router = APIRouter()
 
 @router.post("/", response_model=CompanyRead)
-async def create(company: CompanyCreate, db: AsyncSession = Depends(get_async_session)):
+async def create(company: CompanyCreate, db: AsyncSession = Depends(get_async_session), _: bool = Depends(has_permission("create_company"))):
     return await crud.create_company(db, company)
 
 @router.put("/{company_id}", response_model=CompanyRead)

@@ -18,30 +18,31 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
     if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(status_code=401, detail="Incorrect email or password")
     access_token = create_access_token(data={"id": user.id, "email": user.email})
-    refresh_token = create_refresh_token(data={"email": user.email})
+    refresh_token = create_refresh_token(data={"id": user.id, "email": user.email})
 
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer"
     }
-
 @router.post("/refresh", response_model=Token)
-def refresh_token(req: RefreshTokenRequest, db: AsyncSession = Depends(get_async_session)):
+async def refresh_token(req: RefreshTokenRequest, db: AsyncSession = Depends(get_async_session)):
     try:
         payload = decode_refresh_token(req.refresh_token)
-        email: str = payload.get("email")
-        if email is None:
+        if payload is None:
             raise HTTPException(status_code=401, detail="Invalid refresh token")
-        user = get_user_by_email(db, email=email)
+
+        email: str = payload.get("email")
+        user = await get_user_by_email(db, email=email)
         if user is None:
             raise HTTPException(status_code=401, detail="User not found")
 
-        new_access_token = create_access_token(data={"id": user.id, "email": user.email })
+        new_access_token = create_access_token(data={"id": user.id, "email": user.email})
         return {
             "access_token": new_access_token,
             "refresh_token": req.refresh_token,
             "token_type": "bearer"
         }
+
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid refresh token")

@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.models.user import User, Role, Permission
 from app.core.security import get_password_hash
+from sqlalchemy.orm import selectinload
 
 async def create_permission(db: AsyncSession, name: str):
     permission = Permission(name=name)
@@ -27,5 +28,11 @@ async def create_user(db: AsyncSession, name: str, email: str, password: str, ro
     return user
 
 async def get_user_by_email(db: AsyncSession, email: str):
-    result = await db.execute(select(User).where(User.email == email))
+    result = await db.execute(
+        select(User)
+        .options(
+            selectinload(User.roles).selectinload(Role.permissions)
+        )
+        .where(User.email == email)
+    )
     return result.scalar_one_or_none()
