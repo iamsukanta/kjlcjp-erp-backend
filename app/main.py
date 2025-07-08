@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from app.api.v1 import company, user, auth, income, cost
 from app.core.database import Base, engine
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
 
 app = FastAPI()
 
@@ -20,8 +22,16 @@ app.include_router(company.router, prefix="/api/v1/companies", tags=["Companies"
 app.include_router(income.router, prefix="/api/v1/incomes", tags=["Incomes"])
 app.include_router(cost.router, prefix="/api/v1/costs", tags=["Costs"])
 
+# Ensure the uploads directory exists
+os.makedirs("uploads", exist_ok=True)
+
+# Mount static files
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 # Optional: create tables at startup (not for production)
 @app.on_event("startup")
 async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+
