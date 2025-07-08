@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import DateTime
 from typing import List
 import shutil
+import random
 import os
 from app.schemas.income import IncomeCreate, IncomeUpdate, IncomeRead
 from app.crud import income as crud
@@ -28,7 +29,8 @@ async def create_income(
 ):
     file_path = None
     if file:
-        file_location = f"{UPLOAD_DIR}/{file.filename}"
+        random_prefix = str(random.randint(100000, 999999))
+        file_location = f"{UPLOAD_DIR}/{random_prefix}_{file.filename}"
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         file_path = file_location
@@ -65,7 +67,8 @@ async def update_income(
 ):
     file_path = None
     if file:
-        file_location = f"{UPLOAD_DIR}/{file.filename}"
+        random_prefix = str(random.randint(100000, 999999))
+        file_location = f"{UPLOAD_DIR}/{random_prefix}_{file.filename}"
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         file_path = file_location

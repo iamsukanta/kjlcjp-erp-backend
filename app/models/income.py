@@ -13,7 +13,7 @@ class Income(Base):
     collection_sin: Mapped[str] = mapped_column(String(255), nullable=True) 
     collection_date: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
     income_type: Mapped[str] = mapped_column(String(50), nullable=False)
-    file: Mapped[str] = mapped_column(String(255), nullable=True)
+    income_document: Mapped[str] = mapped_column(String(255), nullable=True)
     note: Mapped[Text] = mapped_column(Text, nullable=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), onupdate=func.now(), nullable=True)

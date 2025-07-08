@@ -5,7 +5,7 @@ from app.models.cost import Cost
 from app.schemas.cost import CostCreate, CostUpdate
 
 async def create_cost(db: AsyncSession, cost_data: CostCreate, file_path: str = None, user_id: int = None):
-    new_cost = Cost(**cost_data.dict(), file=file_path, created_by=user_id)
+    new_cost = Cost(**cost_data.dict(), cost_document=file_path, created_by=user_id)
     db.add(new_cost)
     await db.commit()
     await db.refresh(new_cost)
@@ -25,7 +25,7 @@ async def update_cost(db: AsyncSession, cost_id: int, cost_data: CostUpdate, fil
     for key, value in cost_data.dict(exclude_unset=True).items():
         setattr(cost, key, value)
     if file_path:
-        cost.file = file_path
+        cost.cost_document = file_path
     cost.updated_by = user_id
     await db.commit()
     await db.refresh(cost)

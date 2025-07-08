@@ -13,7 +13,7 @@ class Cost(Base):
     entry_name: Mapped[str] = mapped_column(String(255), nullable=True) 
     cost_date: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
     cost_type: Mapped[str] = mapped_column(String(50), nullable=False)
-    file: Mapped[str] = mapped_column(String(255), nullable=True)
+    cost_document: Mapped[str] = mapped_column(String(255), nullable=True)
     note: Mapped[Text] = mapped_column(Text, nullable=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), onupdate=func.now(), nullable=True)

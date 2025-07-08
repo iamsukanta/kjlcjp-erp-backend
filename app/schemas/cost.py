@@ -19,7 +19,7 @@ class CostUpdate(CostBase):
 
 class CostRead(CostBase):
     id: int
-    file: Optional[str]
+    cost_document: Optional[str]
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
     created_by: Optional[int]

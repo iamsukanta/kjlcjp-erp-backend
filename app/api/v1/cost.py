@@ -4,6 +4,7 @@ from app.schemas.cost import CostCreate, CostUpdate, CostRead
 from app.crud.cost import create_cost, get_costs, update_cost, delete_cost, get_cost
 from app.core.database import get_async_session
 import shutil
+import random
 import os
 from typing import List
 from uuid import uuid4
@@ -28,11 +29,11 @@ async def create_cost_entry(
 ):
     file_path = None
     if file:
-        ext = os.path.splitext(file.filename)[1]
-        file_name = f"{uuid4().hex}{ext}"
-        file_path = os.path.join(UPLOAD_DIR, file_name)
-        with open(file_path, "wb") as f:
-            shutil.copyfileobj(file.file, f)
+        random_prefix = str(random.randint(100000, 999999))
+        file_location = f"{UPLOAD_DIR}/{random_prefix}_{file.filename}"
+        file_path = file_location
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
     cost_data = CostCreate(
         title=title,
         amount=amount,
@@ -71,11 +72,11 @@ async def update_cost_entry(
 ):
     file_path = None
     if file:
-        ext = os.path.splitext(file.filename)[1]
-        file_name = f"{uuid4().hex}{ext}"
-        file_path = os.path.join(UPLOAD_DIR, file_name)
-        with open(file_path, "wb") as f:
-            shutil.copyfileobj(file.file, f)
+        random_prefix = str(random.randint(100000, 999999))
+        file_location = f"{UPLOAD_DIR}/{random_prefix}_{file.filename}"
+        file_path = file_location
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
     cost_data = CostUpdate(
         title=title,
         amount=amount,

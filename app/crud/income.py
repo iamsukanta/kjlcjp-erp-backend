@@ -6,7 +6,7 @@ from app.schemas.income import IncomeCreate, IncomeUpdate
 from sqlalchemy.exc import SQLAlchemyError
 
 async def create_income(db: AsyncSession, income: IncomeCreate, file_path: str = None):
-    new_income = Income(**income.dict(), file=file_path)
+    new_income = Income(**income.dict(), income_document=file_path)
     db.add(new_income)
     await db.commit()
     await db.refresh(new_income)
@@ -28,7 +28,7 @@ async def update_income(db: AsyncSession, income_id: int, income_data: IncomeUpd
         setattr(income, key, value)
 
     if file_path:
-        income.file = file_path
+        income.income_document = file_path
 
     await db.commit()
     await db.refresh(income)

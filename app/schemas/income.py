@@ -19,7 +19,7 @@ class IncomeUpdate(IncomeBase):
 
 class IncomeRead(IncomeBase):
     id: int
-    file: Optional[str]
+    income_document: Optional[str]
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
     created_by: Optional[int]
