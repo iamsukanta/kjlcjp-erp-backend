@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends, UploadFile, File, Form, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import DateTime
-from typing import List
+from typing import List, Optional
 import shutil
 import random
 import os
-from app.schemas.income import IncomeCreate, IncomeUpdate, IncomeRead
+from app.schemas.income import IncomeCreate, IncomeUpdate, IncomeRead, IncomesResponseWithPagination
 from app.crud import income as crud
 from app.core.database import get_async_session
 
@@ -43,9 +43,38 @@ async def create_income(
 
     return await crud.create_income(db, income=income_data, file_path=file_path)
 
-@router.get("/", response_model=List[IncomeRead])
-async def read_incomes(db: AsyncSession = Depends(get_async_session)):
-    return await crud.get_incomes(db)
+@router.get("/", response_model=IncomesResponseWithPagination)
+async def read_incomes(
+    income_type: Optional[str] = Query(None),
+    date_range: Optional[str] = Query(None),
+    from_date: Optional[str] = Query(None),
+    to_date: Optional[str] = Query(None),
+    title: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1),
+    db: AsyncSession = Depends(get_async_session)
+):
+    try:
+        incomes, total =  await crud.get_incomes(
+            db,
+            incomeType=income_type,
+            dateRange=date_range,
+            customFrom=from_date,
+            customTo=to_date,
+            titleSearch=title,
+            page=page,
+            limit=limit
+        )
+
+        return {
+            "items": incomes,
+            "total": total,
+            "page": page,
+            "limit": limit
+        }
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/{income_id}", response_model=IncomeRead)
 async def read_income(income_id: int, db: AsyncSession = Depends(get_async_session)):

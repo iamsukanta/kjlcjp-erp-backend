@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import date, datetime
 
 class CostBase(BaseModel):
@@ -24,6 +24,14 @@ class CostRead(CostBase):
     updated_at: Optional[datetime]
     created_by: Optional[int]
     updated_by: Optional[int]
-
+    
     class Config:
         orm_mode = True
+
+class CostsResponseWithPagination(BaseModel):
+    items: List[CostRead]
+    total: int
+    page: int
+    limit: int
+
+   

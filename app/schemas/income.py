@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List
 from typing import Optional
 from datetime import datetime
 
@@ -24,6 +25,12 @@ class IncomeRead(IncomeBase):
     updated_at: Optional[datetime]
     created_by: Optional[int]
     updated_by: Optional[int]
+
+class IncomesResponseWithPagination(BaseModel):
+    items: List[IncomeRead]
+    total: int
+    page: int
+    limit: int
 
     class Config:
         orm_mode = True
