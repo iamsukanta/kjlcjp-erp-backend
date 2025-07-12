@@ -1,3 +1,4 @@
+from fastapi import UploadFile, File
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime
@@ -34,6 +35,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    file: UploadFile = File(None)
     role_ids: List[str]
 
 class UserOut(UserBase):
