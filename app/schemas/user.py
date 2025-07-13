@@ -19,7 +19,7 @@ class RoleBase(BaseModel):
     name: str
 
 class RoleCreate(RoleBase):
-    permission_ids: List[str]
+    permission_ids: List[int]
 
 class RoleOut(RoleBase):
     id: int
@@ -35,7 +35,9 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
-    file: Optional[UploadFile] = File(None)
+
+class UserUpdate(UserBase):
+    pass
 
 class UserOut(UserBase):
     id: int

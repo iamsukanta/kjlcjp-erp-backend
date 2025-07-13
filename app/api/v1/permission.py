@@ -9,10 +9,10 @@ router = APIRouter()
 
 @router.post("/")
 async def add_permission(data: PermissionCreate, db: AsyncSession = Depends(get_async_session)):
-    return await create_permission(db, data.name)
+    return await create_permission(db, data)
 
 @router.put("/{role_id}", response_model=PermissionOut)
-async def update_permission( role_id: int, data: PermissionCreate, db: AsyncSession = Depends(get_async_session)):
+async def edit_permission( role_id: int, data: PermissionCreate, db: AsyncSession = Depends(get_async_session)):
     return await update_permission(db, role_id, data)
 
 @router.get("/", response_model=List[PermissionOut])
@@ -20,5 +20,5 @@ async def all_permissions(db: AsyncSession = Depends(get_async_session)):
     return await get_all_permissions(db)
 
 @router.delete("/{role_id}")
-async def delete_permission(role_id: int, db: AsyncSession = Depends(get_async_session)):
+async def remove_permission(role_id: int, db: AsyncSession = Depends(get_async_session)):
     return await delete_permission(db, role_id)

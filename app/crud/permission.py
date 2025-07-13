@@ -9,19 +9,27 @@ async def create_permission(db: AsyncSession, permissionInfo: PermissionCreate):
     permission = Permission(name=permissionInfo.name)
     db.add(permission)
     await db.commit()
-    return permission
+    return await get_permission(db, permission.id)
 
 async def update_permission(db: AsyncSession, permission_id: int, permissionInfo: PermissionCreate):
-    permission = await db.get(User, permission_id)
+    result = await db.execute(
+        select(Permission).where(Permission.id == permission_id)
+    )
+    permission = result.scalars().first()
     if not permission:
         raise HTTPException(status_code=404, detail="Permission not found")
 
-    for key, value in permissionInfo.dict(exclude_unset=True).items():
-        setattr(permission, key, value)
-    
+    permission.name = permissionInfo.name 
     await db.commit()
     await db.refresh(permission)
-    return permission
+    return await get_permission(db, permission.id)
+
+async def get_permission(db: AsyncSession, permisson_id: int):
+    result = await db.execute(
+        select(Permission)
+        .where(Permission.id == permisson_id)
+    )
+    return result.scalar_one_or_none()
 
 async def get_all_permissions(db: AsyncSession):
     result = await db.execute(select(Permission))
