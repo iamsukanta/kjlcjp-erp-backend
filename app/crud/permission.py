@@ -1,11 +1,17 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from sqlalchemy import select, func
 from app.schemas.user import PermissionCreate
 from app.models.user import User, Permission
 from sqlalchemy.orm import selectinload
 
 async def create_permission(db: AsyncSession, permissionInfo: PermissionCreate):
+    result = await db.execute(
+        select(Permission).where(func.lower(Permission.name) == permissionInfo.name.lower())
+    )
+    permission = result.scalars().first()
+    if permission:
+        raise HTTPException(status_code=404, detail="Permission already exists.");
     permission = Permission(name=permissionInfo.name)
     db.add(permission)
     await db.commit()

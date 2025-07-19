@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from sqlalchemy import func, select
 from app.schemas.user import UserCreate, UserUpdate
 from app.models.user import User, Role
 from app.core.security import get_password_hash
@@ -8,7 +8,13 @@ from sqlalchemy.orm import selectinload
 
 
 async def create_user(db: AsyncSession, userInfo: UserCreate, role_ids = []):
-    print(role_ids , 'role ids ....')
+    result = await db.execute(
+        select(User).where(func.lower(User.email) == userInfo.email.lower())
+    )
+    user = result.scalars().first()
+    if user:
+        raise HTTPException(status_code=404, detail="User already exists.")
+
     new_user = User(**userInfo.dict())
     if role_ids:
         roles_result = await db.execute(select(Role).where(Role.id.in_(role_ids)))

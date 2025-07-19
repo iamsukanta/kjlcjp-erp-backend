@@ -8,7 +8,7 @@ import random
 import os
 from typing import List, Optional
 from app.crud import cost as crud
-
+from app.core.permissions import has_permission
 
 router = APIRouter()
 
@@ -26,7 +26,8 @@ async def create_cost_entry(
     note: str = Form(None),
     file: UploadFile = File(None),
     db: AsyncSession = Depends(get_async_session),
-    created_by: int = 1  # Replace with actual user extraction
+    created_by: int = 1,
+    _: bool = Depends(has_permission("create_cost"))
 ):
     file_path = None
     if file:
@@ -46,6 +47,39 @@ async def create_cost_entry(
     )
     return await create_cost(db, cost_data, file_path=file_path, user_id=created_by)
 
+@router.put("/{cost_id}", response_model=CostRead)
+async def update_cost_entry(
+    cost_id: int,
+    title: str = Form(...),
+    amount: int = Form(...),
+    voucher: str = Form(None),
+    entry_name: str = Form(None),
+    cost_type: str = Form(None),
+    cost_date: str = Form(None),
+    note: str = Form(None),
+    file: UploadFile = File(None),
+    db: AsyncSession = Depends(get_async_session),
+    updated_by: int = 1,
+    _: bool = Depends(has_permission("update_cost"))
+):
+    file_path = None
+    if file:
+        random_prefix = str(random.randint(100000, 999999))
+        file_location = f"{UPLOAD_DIR}/{random_prefix}_{file.filename}"
+        file_path = file_location
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    cost_data = CostUpdate(
+        title=title,
+        amount=amount,
+        voucher=voucher,
+        entry_name=entry_name,
+        cost_type=cost_type,
+        cost_date=cost_date,
+        note=note
+    )
+    return await update_cost(db, cost_id, cost_data, file_path=file_path, user_id=updated_by)
+
 @router.get("/", response_model=CostsResponseWithPagination)
 async def read_costs(
     cost_type: Optional[str] = Query(None),
@@ -55,7 +89,8 @@ async def read_costs(
     title: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
-    db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    _: bool = Depends(has_permission("read_cost"))
 ):
     try:
         costs, total =  await crud.get_costs(
@@ -80,45 +115,13 @@ async def read_costs(
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/{cost_id}", response_model=CostRead)
-async def get_cost_entry(cost_id: int, db: AsyncSession = Depends(get_async_session)):
+async def get_cost_entry(cost_id: int, db: AsyncSession = Depends(get_async_session), _: bool = Depends(has_permission("details_cost"))):
     cost = await get_cost(db, cost_id)
     if not cost:
         raise HTTPException(status_code=404, detail="Cost not found")
     return cost
 
-@router.put("/{cost_id}", response_model=CostRead)
-async def update_cost_entry(
-    cost_id: int,
-    title: str = Form(...),
-    amount: int = Form(...),
-    voucher: str = Form(None),
-    entry_name: str = Form(None),
-    cost_type: str = Form(None),
-    cost_date: str = Form(None),
-    note: str = Form(None),
-    file: UploadFile = File(None),
-    db: AsyncSession = Depends(get_async_session),
-    updated_by: int = 1  # Replace with actual user
-):
-    file_path = None
-    if file:
-        random_prefix = str(random.randint(100000, 999999))
-        file_location = f"{UPLOAD_DIR}/{random_prefix}_{file.filename}"
-        file_path = file_location
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-    cost_data = CostUpdate(
-        title=title,
-        amount=amount,
-        voucher=voucher,
-        entry_name=entry_name,
-        cost_type=cost_type,
-        cost_date=cost_date,
-        note=note
-    )
-    return await update_cost(db, cost_id, cost_data, file_path=file_path, user_id=updated_by)
-
 @router.delete("/{cost_id}")
-async def delete_cost_entry(cost_id: int, db: AsyncSession = Depends(get_async_session)):
+async def delete_cost_entry(cost_id: int, db: AsyncSession = Depends(get_async_session), _: bool = Depends(has_permission("delete_cost"))):
     await delete_cost(db, cost_id)
     return {"detail": "Deleted successfully"}

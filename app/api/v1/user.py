@@ -6,6 +6,7 @@ from app.crud.user import create_user, update_user, get_all_users, get_user_deta
 from app.core.database import get_async_session
 import shutil, random, os
 from app.core.security import get_password_hash
+from app.core.permissions import has_permission
 
 router = APIRouter()
 
@@ -19,7 +20,8 @@ async def add_new_user(
     password: str = Form(...),
     role_ids: Optional[List[int]] = Form(None),
     file: Optional[UploadFile] = File(None),
-    db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    _: bool = Depends(has_permission("create_user"))
 ):
     try:
         file_path = None
@@ -48,7 +50,8 @@ async def edit_user(
     password: Optional[str] = Form(None),
     role_ids: Optional[List[int]] = Form(None),
     file: Optional[UploadFile] = File(None),
-    db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    _: bool = Depends(has_permission("update_user"))
 ):
     try:
         file_path = None
@@ -76,15 +79,14 @@ async def edit_user(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @router.get("/", response_model=List[UserOut])
-async def all_users(db: AsyncSession = Depends(get_async_session)):
+async def all_users(db: AsyncSession = Depends(get_async_session), _: bool = Depends(has_permission("read_user"))):
     return await get_all_users(db)
 
 @router.get("/{user_id}", response_model=UserOut)
-async def get_user(user_id: int, db: AsyncSession = Depends(get_async_session)):
+async def get_user(user_id: int, db: AsyncSession = Depends(get_async_session), _: bool = Depends(has_permission("details_user"))):
     return await get_user_details(db, user_id)
 
 @router.delete("/{user_id}")
-async def remove_user(user_id: int, db: AsyncSession = Depends(get_async_session)):
+async def remove_user(user_id: int, db: AsyncSession = Depends(get_async_session), _: bool = Depends(has_permission("delete_user"))):
     return await delete_user(db, user_id)

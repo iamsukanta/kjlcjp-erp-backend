@@ -1,11 +1,17 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from sqlalchemy import select, func
 from app.schemas.user import RoleCreate
 from app.models.user import Role, Permission
 from sqlalchemy.orm import selectinload
 
 async def create_role(db: AsyncSession, roleInfo: RoleCreate):
+    result = await db.execute(
+        select(Role).where(func.lower(Role.name) == roleInfo.name.lower())
+    )
+    role = result.scalars().first()
+    if role:
+        raise HTTPException(status_code=404, detail="Role already exists.");
     role = Role(name=roleInfo.name)
     if roleInfo.permission_ids:
         permission_result = await db.execute(select(Permission).where(Permission.id.in_(roleInfo.permission_ids)))

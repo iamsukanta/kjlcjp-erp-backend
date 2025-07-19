@@ -9,21 +9,15 @@ from app.core.security import decode_access_token
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 bearer_scheme = HTTPBearer()
-
-# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
-
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme), db: AsyncSession = Depends(get_async_session)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail="Token is not validated.",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
         token = credentials.credentials
-        print(token, 'token ..')
         payload = decode_access_token(token)
-
-        print(payload, 'payload data ...')
         if payload is None:
             raise credentials_exception
         email: str = payload.get("email")

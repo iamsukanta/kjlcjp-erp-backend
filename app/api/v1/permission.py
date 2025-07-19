@@ -4,21 +4,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.user import PermissionOut, PermissionCreate
 from app.crud.permission import get_all_permissions, update_permission, delete_permission, create_permission
 from app.core.database import get_async_session
+from app.core.permissions import has_permission
 
 router = APIRouter()
 
 @router.post("/")
-async def add_permission(data: PermissionCreate, db: AsyncSession = Depends(get_async_session)):
+async def add_permission(data: PermissionCreate, db: AsyncSession = Depends(get_async_session), _: bool = Depends(has_permission("create_permission"))):
     return await create_permission(db, data)
 
 @router.put("/{role_id}", response_model=PermissionOut)
-async def edit_permission( role_id: int, data: PermissionCreate, db: AsyncSession = Depends(get_async_session)):
+async def edit_permission( role_id: int, data: PermissionCreate, db: AsyncSession = Depends(get_async_session), _: bool = Depends(has_permission("update_permission"))):
     return await update_permission(db, role_id, data)
 
 @router.get("/", response_model=List[PermissionOut])
-async def all_permissions(db: AsyncSession = Depends(get_async_session)):
+async def all_permissions(db: AsyncSession = Depends(get_async_session), _: bool = Depends(has_permission("read_permission"))):
     return await get_all_permissions(db)
 
 @router.delete("/{role_id}")
-async def remove_permission(role_id: int, db: AsyncSession = Depends(get_async_session)):
+async def remove_permission(role_id: int, db: AsyncSession = Depends(get_async_session), _: bool = Depends(has_permission("delete_permission"))):
     return await delete_permission(db, role_id)

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.v1 import company, user, auth, income, cost, role, permission
+from app.api.v1 import company, user, auth, income, cost, role, permission, dashboard
 from app.core.database import Base, engine
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -23,6 +23,7 @@ app.include_router(permission.router, prefix="/api/v1/permissions", tags=["Permi
 app.include_router(company.router, prefix="/api/v1/companies", tags=["Companies"])
 app.include_router(income.router, prefix="/api/v1/incomes", tags=["Incomes"])
 app.include_router(cost.router, prefix="/api/v1/costs", tags=["Costs"])
+app.include_router(dashboard.router, prefix="/api/v1/dashboards", tags=["Dashboards"])
 
 # Ensure the uploads directory exists
 os.makedirs("uploads", exist_ok=True)
