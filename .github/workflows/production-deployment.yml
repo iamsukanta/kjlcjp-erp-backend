@@ -55,6 +55,6 @@ jobs:
             && sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=$IMAGE_TAG/" .env.production \
             || echo "IMAGE_TAG=$IMAGE_TAG" >> .env.production
 
-          docker-compose -f docker-compose.yml --env-file .env.production --profile prod down
-          docker-compose -f docker-compose.yml --env-file .env.production --profile prod up -d --build
+          docker-compose -f docker-compose.prod.yml --env-file .env.production down
+          docker-compose -f docker-compose.prod.yml --env-file .env.production up -d --build
 
