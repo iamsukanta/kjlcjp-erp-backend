@@ -9,7 +9,6 @@ DATABASE_URL = settings.SQLALCHEMY_DATABASE_URI.replace("postgresql+psycopg2", "
 engine = create_async_engine(DATABASE_URL, echo=True)
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
-# @asynccontextmanager
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with SessionLocal() as session:
         yield session
